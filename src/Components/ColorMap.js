@@ -6,9 +6,12 @@ import {
   Popup,
   TileLayer,
   Polygon,
-  Tooltip
+  Tooltip,
+  flyTo
 } from 'react-leaflet'
 import { Typography } from '@material-ui/core';
+import Legend from './Legend';
+import DiscreteSlider from './Slider';
 
 const API = 'https://api-covid.victorbarbat.com/';
 
@@ -100,6 +103,12 @@ export default class OtherLayersExample extends Component {
     }
     this.setState({draggable: true});
     }
+
+    setZoomPosition = () => {
+      
+          const position = [this.state.lat, this.state.lng];
+          this.map.leafletElement.flyTo(position, 7)
+    }
   
     handleZoom = () => {
       this.enableDragging();
@@ -136,6 +145,7 @@ export default class OtherLayersExample extends Component {
     };
 
   render() {
+    
     if(this.state.dataRomania) {
     const position = [this.state.lat, this.state.lng];
     let arrCities = [];
@@ -158,8 +168,10 @@ export default class OtherLayersExample extends Component {
         return (
           <div>
 
-<Map style={{ height: "91vh", marginTop: "64px" }}
-      ref = {(ref) => {this.map = ref}}
+            <Legend></Legend>
+            <DiscreteSlider></DiscreteSlider>
+  <Map style={{ height: "91vh", marginTop: "64px" }}
+        ref = {(ref) => {this.map = ref}}
       center={position}
       zoom={this.state.zoom}
       dragging={this.state.draggable}
@@ -210,12 +222,12 @@ export default class OtherLayersExample extends Component {
 
           {
             this.state.dataRomania.map((county, i ) => {
-              let  randomColor = this.getRandomColor()
+              let  randomFillColor = this.countyIsLoaded() <= -1 || this.getMapZoom() < 9 ? this.getRandomColor() : 'white';
               return <Polygon
                key={i}
                positions={county.geometry.coordinates}
-               color= {randomColor}
-               fillColor = {randomColor}
+               color= {'white'}
+               fillColor = {randomFillColor}
                fillOpacity= "0.9"
                onmouseover = {() => this.mouseOver(county.name)}
                onClick={() => this.handleCountyClicked(county.name)}
@@ -237,6 +249,10 @@ export default class OtherLayersExample extends Component {
           <Popup>Popup in FeatureGroup</Popup>
         </FeatureGroup>
       </Map>
+      <button className='center-map'
+              onClick={this.setZoomPosition}>
+        Centreaza harta
+      </button>
       </div>
     )
   }
